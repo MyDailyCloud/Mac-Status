@@ -22,7 +22,20 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Checkout requested tag (manual)
+        if: ${{ inputs.tag != '' }}
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euxo pipefail
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            git checkout "refs/tags/$TAG"
+          else
+            echo "ERROR: Tag '$TAG' not found. Create it first or leave the input empty to build the current ref."
+            exit 1
+          fi
 
       - name: Build (Release)
         run: |
