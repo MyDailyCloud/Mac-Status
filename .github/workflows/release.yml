@@ -1,0 +1,63 @@
+name: Build & Release (macOS)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build/release (e.g. v1.0.0). Leave empty to build current ref only."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Build (Release)
+        run: |
+          set -euxo pipefail
+          xcodebuild -version
+          xcodebuild \
+            -project MacStatus.xcodeproj \
+            -target MacStatus \
+            -configuration Release \
+            -sdk macosx \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package (.zip)
+        run: |
+          set -euxo pipefail
+          APP_PATH="build/Release/MacStatus.app"
+          test -d "$APP_PATH"
+          REF_NAME="${{ inputs.tag || github.ref_name }}"
+          ZIP_NAME="MacStatus-${REF_NAME}-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Create GitHub Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') || inputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
