@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct LoginView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -38,6 +39,14 @@ struct LoginView: View {
             .padding(.top, 4)
             
             Spacer()
+            
+            Button(action: {
+                NSApplication.shared.terminate(nil)
+            }) {
+                Text("退出")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

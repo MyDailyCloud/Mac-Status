@@ -48,6 +48,17 @@ open MacStatus.xcodeproj
    - 在Xcode中选择目标设备（My Mac）
    - 点击运行按钮（⌘R）或选择 Product > Run
 
+### 从 Release 安装（免编译）
+
+1. 在 GitHub Releases 下载最新的 `MacStatus-*-macos.zip`，解压得到 `MacStatus.app`。
+2. 首次打开如果提示“无法打开 / 已损坏 / 来自身份不明开发者”，按下面方法放行（未公证应用的常见提示）：
+   - Finder 中右键 `MacStatus.app` → “打开”（通常可一次性放行）
+   - 或到 `系统设置 -> 隐私与安全性`，在“已阻止打开”提示处点“仍要打开”
+   - 或在终端执行（把路径替换成你的实际位置）：
+     ```bash
+     xattr -dr com.apple.quarantine /Applications/MacStatus.app
+     ```
+
 ### 配置 Supabase + GitHub 登录（必须）
 
 登录成功后才会解锁监控，并把数据写入 Supabase 表 `mac_status_metrics`。
@@ -59,79 +70,8 @@ open MacStatus.xcodeproj
    - 确保已启用 GitHub Provider，并填好 GitHub OAuth App 的 Client ID/Secret
 
 3. **数据库表**
-   - 在 Supabase SQL 编辑器执行（或参考 `supabase/sql/`）：
-
-     ```sql
-     create extension if not exists "uuid-ossp";
-
-     create table if not exists public.mac_status_metrics (
-       id uuid primary key default uuid_generate_v4(),
-       created_at timestamptz not null default now(),
-       user_id text,
-       cpu_usage double precision,
-       memory_usage double precision,
-       used_memory_gb double precision,
-       total_memory_gb double precision,
-       disk_read_mb_s double precision,
-       disk_write_mb_s double precision
-     );
-
-     alter table public.mac_status_metrics enable row level security;
-
-     create policy "insert_own_metrics"
-     on public.mac_status_metrics
-     for insert
-     to authenticated
-     with check (auth.uid()::text = coalesce(user_id, auth.uid()::text));
-
-     create policy "select_own_metrics"
-     on public.mac_status_metrics
-     for select
-     to authenticated
-     using (auth.uid()::text = user_id);
-     ```
-
-   - 设备列表（每台设备单独注册一次）：
-
-     ```sql
-     create extension if not exists "uuid-ossp";
-
-     create table if not exists public.mac_status_devices (
-       id uuid primary key default uuid_generate_v4(),
-       created_at timestamptz not null default now(),
-       user_id text not null,
-       device_uuid uuid not null,
-       device_name text,
-       model text,
-       os_version text,
-       app_version text,
-       last_seen_at timestamptz not null default now()
-     );
-
-     create unique index if not exists mac_status_devices_user_device_unique
-       on public.mac_status_devices (user_id, device_uuid);
-
-     alter table public.mac_status_devices enable row level security;
-
-     create policy "insert_own_devices"
-     on public.mac_status_devices
-     for insert
-     to authenticated
-     with check (auth.uid()::text = user_id);
-
-     create policy "select_own_devices"
-     on public.mac_status_devices
-     for select
-     to authenticated
-     using (auth.uid()::text = user_id);
-
-     create policy "update_own_devices"
-     on public.mac_status_devices
-     for update
-     to authenticated
-     using (auth.uid()::text = user_id)
-     with check (auth.uid()::text = user_id);
-     ```
+   - 在 Supabase SQL Editor 执行 `supabase/sql/update.sql`（幂等，一次性创建/补齐 `mac_status_metrics`/`mac_status_devices` 表结构并配置 RLS policies）。
+   - `mac_status_metrics` 支持 `payload jsonb`：客户端会把指标与设备信息写入 `payload`，以后新增字段无需改表；常用字段仍保留为独立列便于查询/画图。
 
 ### 从源码构建
 

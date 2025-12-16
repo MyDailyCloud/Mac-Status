@@ -73,4 +73,17 @@ jobs:
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           files: ${{ env.ZIP_NAME }}
+          body: |
+            ## macOS 权限提示（无法打开/已损坏/身份不明开发者）
+
+            这是一个未公证的 macOS 应用，首次打开可能被 Gatekeeper 拦截。可用以下任一方式放行：
+
+            - Finder 右键 `MacStatus.app` → “打开”
+            - `系统设置 -> 隐私与安全性` → 在“已阻止打开”处点“仍要打开”
+            - 终端解除隔离（把路径替换成你的实际位置）：
+              ```bash
+              xattr -dr com.apple.quarantine /Applications/MacStatus.app
+              ```
+
           generate_release_notes: true
+          append_body: true

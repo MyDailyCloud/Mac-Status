@@ -22,6 +22,13 @@ struct ContentView: View {
                     Text(authManager.currentUserEmail)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    Button {
+                        openPanel()
+                    } label: {
+                        Image(systemName: "globe")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("打开 Web 面板")
                 }
                 Button {
                     copyAllInfo()
@@ -348,6 +355,11 @@ struct ContentView: View {
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(text, forType: .string)
+    }
+
+    private func openPanel() {
+        guard let url = URL(string: "https://mac.mydaily.cloud/") else { return }
+        NSWorkspace.shared.open(url)
     }
     
     private func buildDiagnosticsText() -> String {
