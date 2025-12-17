@@ -92,3 +92,8 @@ iOSInjectionProject/
 # macOS
 .DS_Store
 
+# Environment
+.env
+.env.*
+!.env.example
+!MacStatus/.env

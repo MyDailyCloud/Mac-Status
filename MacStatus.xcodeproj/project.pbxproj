@@ -18,6 +18,7 @@
 		A1000009000000000000001 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010000000000000001 /* DeviceManager.swift */; };
 		A100000A000000000000001 /* SupabaseDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011000000000000001 /* SupabaseDeviceService.swift */; };
 		A100000B000000000000001 /* DevicesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012000000000000001 /* DevicesViewModel.swift */; };
+		A100000C000000000000001 /* .env in Resources */ = {isa = PBXBuildFile; fileRef = A2000013000000000000001 /* .env */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		A2000010000000000000001 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
 		A2000011000000000000001 /* SupabaseDeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDeviceService.swift; sourceTree = "<group>"; };
 		A2000012000000000000001 /* DevicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesViewModel.swift; sourceTree = "<group>"; };
+		A2000013000000000000001 /* .env */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env; sourceTree = "<group>"; };
 		A3000001000000000000001 /* MacStatus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacStatus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -45,6 +47,17 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A8000002000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000C000000000000001 /* .env in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXGroup section */
 		A5000001000000000000001 = {
@@ -69,6 +82,7 @@
 				A2000008000000000000001 /* MetricsUploader.swift */,
 				A2000009000000000000001 /* SupabaseMetricsService.swift */,
 				A2000011000000000000001 /* SupabaseDeviceService.swift */,
+				A2000013000000000000001 /* .env */,
 				A2000004000000000000001 /* Info.plist */,
 			);
 			path = MacStatus;
@@ -90,6 +104,7 @@
 			buildConfigurationList = A7000001000000000000001 /* Build configuration list for PBXNativeTarget "MacStatus" */;
 			buildPhases = (
 				A8000001000000000000001 /* Sources */,
+				A8000002000000000000001 /* Resources */,
 				A4000001000000000000001 /* Frameworks */,
 			);
 			buildRules = (

@@ -3,30 +3,123 @@ import Combine
 import AuthenticationServices
 import AppKit
 
+private enum DotEnv {
+    static func load() -> [String: String] {
+        for url in candidateURLs() {
+            if let dict = loadFile(url: url), !dict.isEmpty {
+                return dict
+            }
+        }
+        return [:]
+    }
+    
+    private static func candidateURLs() -> [URL] {
+        var urls: [URL] = []
+        
+        if let resourceURL = Bundle.main.resourceURL {
+            urls.append(resourceURL.appendingPathComponent(".env"))
+        }
+        
+        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            urls.append(appSupport.appendingPathComponent("MacStatus/.env"))
+            if let bundleId = Bundle.main.bundleIdentifier {
+                urls.append(appSupport.appendingPathComponent(bundleId).appendingPathComponent(".env"))
+            }
+        }
+        
+        let cwd = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+        urls.append(cwd.appendingPathComponent(".env"))
+        
+        return urls
+    }
+    
+    private static func loadFile(url: URL) -> [String: String]? {
+        guard
+            let data = try? Data(contentsOf: url),
+            let contents = String(data: data, encoding: .utf8)
+        else {
+            return nil
+        }
+        
+        return parse(contents: contents)
+    }
+    
+    private static func parse(contents: String) -> [String: String] {
+        var dict: [String: String] = [:]
+        
+        for rawLine in contents.split(whereSeparator: \.isNewline) {
+            var line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !line.isEmpty, !line.hasPrefix("#") else { continue }
+            
+            if line.hasPrefix("export ") {
+                line.removeFirst("export ".count)
+                line = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            
+            guard let eq = line.firstIndex(of: "=") else { continue }
+            let key = String(line[..<eq]).trimmingCharacters(in: .whitespacesAndNewlines)
+            var value = String(line[line.index(after: eq)...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !key.isEmpty else { continue }
+            
+            if value.hasPrefix("\""), value.hasSuffix("\""), value.count >= 2 {
+                value = String(value.dropFirst().dropLast())
+            } else if value.hasPrefix("'"), value.hasSuffix("'"), value.count >= 2 {
+                value = String(value.dropFirst().dropLast())
+            }
+            
+            dict[key] = value
+        }
+        
+        return dict
+    }
+}
+
 struct SupabaseConfig {
     let url: URL
     let anonKey: String
     
     static func load() -> SupabaseConfig? {
-        // First try environment variables for local development
-        let env = ProcessInfo.processInfo.environment
-        if let urlString = env["SUPABASE_URL"],
-           let key = env["SUPABASE_ANON_KEY"],
-           let url = URL(string: urlString) {
-            return SupabaseConfig(url: url, anonKey: key)
+        // 1) Environment variables
+        if let config = build(from: ProcessInfo.processInfo.environment) {
+            return config
         }
         
-        // Fallback to Info.plist
+        // 2) .env (auto-loaded from current working directory or app bundle resources)
+        if let config = build(from: DotEnv.load()) {
+            return config
+        }
+        
+        // 3) Info.plist fallback
         if
             let dict = Bundle.main.infoDictionary,
             let urlString = dict["SUPABASE_URL"] as? String,
-            let key = dict["SUPABASE_ANON_KEY"] as? String,
-            let url = URL(string: urlString)
+            let key = dict["SUPABASE_ANON_KEY"] as? String
         {
-            return SupabaseConfig(url: url, anonKey: key)
+            return build(urlString: urlString, anonKey: key)
         }
         
         return nil
+    }
+    
+    private static func build(from dict: [String: String]) -> SupabaseConfig? {
+        build(urlString: dict["SUPABASE_URL"], anonKey: dict["SUPABASE_ANON_KEY"])
+    }
+    
+    private static func build(urlString: String?, anonKey: String?) -> SupabaseConfig? {
+        let urlString = urlString?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let anonKey = anonKey?.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard
+            let urlString,
+            !urlString.isEmpty,
+            let anonKey,
+            !anonKey.isEmpty,
+            let url = URL(string: urlString)
+        else {
+            return nil
+        }
+        
+        return SupabaseConfig(url: url, anonKey: anonKey)
     }
 }
 

@@ -71,8 +71,11 @@ In the current version, monitoring is unlocked only after login, and snapshots a
 
 Config is loaded in this order:
 
-1. Environment variables (recommended for local dev): `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-2. `MacStatus/Info.plist`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+1. Environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+2. `.env` file (recommended for local dev): copy `.env.example` to `.env` and fill values
+3. `MacStatus/Info.plist`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+
+Note: `.env` is auto-loaded (priority: app bundle resources → Application Support → current working directory).
 
 ### 2) Supabase dashboard settings
 

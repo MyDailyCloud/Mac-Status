@@ -71,8 +71,11 @@ xcodebuild -project MacStatus.xcodeproj -scheme MacStatus -configuration Release
 
 应用按以下优先级读取配置：
 
-1. 环境变量（适合本地开发）：`SUPABASE_URL`、`SUPABASE_ANON_KEY`
-2. `MacStatus/Info.plist`：`SUPABASE_URL`、`SUPABASE_ANON_KEY`
+1. 环境变量：`SUPABASE_URL`、`SUPABASE_ANON_KEY`
+2. `.env` 文件（推荐本地开发）：复制 `.env.example` 为 `.env` 并填写
+3. `MacStatus/Info.plist`：`SUPABASE_URL`、`SUPABASE_ANON_KEY`
+
+说明：`.env` 会自动读取（优先级：App 包资源 → Application Support → 当前工作目录）。
 
 ### 2）Supabase 控制台设置
 
