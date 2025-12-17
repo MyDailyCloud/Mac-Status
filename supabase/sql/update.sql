@@ -54,6 +54,7 @@ create table if not exists public.mac_status_metrics (
   id uuid primary key default uuid_generate_v4(),
   created_at timestamptz not null default now(),
   user_id text not null,
+  device_id uuid references public.mac_status_devices(id),
   cpu_usage double precision,
   memory_usage double precision,
   used_memory_gb double precision,
@@ -70,11 +71,54 @@ alter table public.mac_status_metrics add column if not exists cpu_usage double 
 alter table public.mac_status_metrics add column if not exists memory_usage double precision;
 alter table public.mac_status_metrics add column if not exists used_memory_gb double precision;
 alter table public.mac_status_metrics add column if not exists total_memory_gb double precision;
+alter table public.mac_status_metrics add column if not exists device_id uuid;
 alter table public.mac_status_metrics add column if not exists disk_read_mb_s double precision;
 alter table public.mac_status_metrics add column if not exists disk_write_mb_s double precision;
 alter table public.mac_status_metrics add column if not exists network_download_mb_s double precision;
 alter table public.mac_status_metrics add column if not exists network_upload_mb_s double precision;
 alter table public.mac_status_metrics add column if not exists payload jsonb not null default '{}'::jsonb;
+
+-- 设备关联（可重复执行）
+do $$
+declare
+  device_attnum int;
+  exists_fk boolean;
+begin
+  select attnum
+    into device_attnum
+    from pg_attribute
+   where attrelid = 'public.mac_status_metrics'::regclass
+     and attname = 'device_id'
+     and not attisdropped;
+
+  if device_attnum is null then
+    return;
+  end if;
+
+  select exists(
+    select 1
+      from pg_constraint c
+     where c.conrelid = 'public.mac_status_metrics'::regclass
+       and c.contype = 'f'
+       and c.confrelid = 'public.mac_status_devices'::regclass
+       and c.conkey = array[device_attnum]
+  )
+  into exists_fk;
+
+  if not exists_fk then
+    alter table public.mac_status_metrics
+      add constraint mac_status_metrics_device_id_fkey
+      foreign key (device_id) references public.mac_status_devices(id);
+  end if;
+exception
+  when duplicate_object then null;
+end $$;
+
+create index if not exists idx_mac_status_metrics_device_id
+  on public.mac_status_metrics (device_id);
+
+create index if not exists idx_mac_status_metrics_device_created
+  on public.mac_status_metrics (device_id, created_at desc);
 
 -- 如果 user_id 之前允许为空，这里不强制改 NOT NULL，避免迁移失败；
 -- Mac 客户端已确保写入 user_id（来自 JWT sub）。
@@ -97,4 +141,3 @@ to authenticated
 using (auth.uid()::text = user_id);
 
 commit;
-

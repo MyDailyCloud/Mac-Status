@@ -47,6 +47,7 @@ fileprivate enum JSONValue: Codable {
 
 fileprivate struct MetricsPayload: Codable {
     let user_id: String?
+    let device_id: String?
     let cpu_usage: Double
     let memory_usage: Double
     let used_memory_gb: Double
@@ -66,7 +67,7 @@ class SupabaseMetricsService {
         self.config = config
     }
     
-    func upload(snapshot: MetricsSnapshot, session: SupabaseSession) async throws {
+    func upload(snapshot: MetricsSnapshot, session: SupabaseSession, deviceId: String) async throws {
         let endpoint = config.url.appendingPathComponent("rest/v1/mac_status_metrics")
         
         let isoFormatter = ISO8601DateFormatter()
@@ -85,6 +86,10 @@ class SupabaseMetricsService {
             "memory_usage": .double(snapshot.memoryUsage),
             "used_memory_gb": .double(snapshot.usedMemoryGB),
             "total_memory_gb": .double(snapshot.totalMemoryGB),
+            "device_id": .string(deviceId),
+            "disk_usage": .double(snapshot.diskUsage),
+            "disk_used_gb": .double(snapshot.diskUsedGB),
+            "disk_total_gb": .double(snapshot.diskTotalGB),
             "disk_read_mb_s": .double(snapshot.diskReadSpeedMBps),
             "disk_write_mb_s": .double(snapshot.diskWriteSpeedMBps),
             "network_download_mb_s": .double(snapshot.networkDownloadSpeedMBps),
@@ -97,6 +102,7 @@ class SupabaseMetricsService {
         ]
         let v2 = MetricsPayload(
             user_id: userId,
+            device_id: deviceId,
             cpu_usage: snapshot.cpuUsage,
             memory_usage: snapshot.memoryUsage,
             used_memory_gb: snapshot.usedMemoryGB,
@@ -115,6 +121,7 @@ class SupabaseMetricsService {
             if shouldFallbackToLegacySchema(message) {
                 let v1 = MetricsPayload(
                     user_id: userId,
+                    device_id: nil,
                     cpu_usage: snapshot.cpuUsage,
                     memory_usage: snapshot.memoryUsage,
                     used_memory_gb: snapshot.usedMemoryGB,
@@ -159,6 +166,7 @@ class SupabaseMetricsService {
         let mentionsNewKey =
             lower.contains("network_download_mb_s") ||
             lower.contains("network_upload_mb_s") ||
+            lower.contains("device_id") ||
             lower.contains("network_download") ||
             lower.contains("network_upload") ||
             lower.contains("payload")

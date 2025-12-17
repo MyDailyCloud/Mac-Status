@@ -51,6 +51,14 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
+      - name: Code sign (ad-hoc, enable sandbox)
+        run: |
+          set -euxo pipefail
+          APP_PATH="build/Release/MacStatus.app"
+          test -d "$APP_PATH"
+          codesign --force --deep --sign - --entitlements MacStatus/MacStatus.entitlements "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH"
+
       - name: Package (.zip)
         run: |
           set -euxo pipefail

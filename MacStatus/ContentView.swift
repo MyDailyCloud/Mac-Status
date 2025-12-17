@@ -79,6 +79,34 @@ struct ContentView: View {
                             }
                         }
                     }
+
+                    // 硬盘使用量
+                    StatusCard(
+                        title: "硬盘使用",
+                        icon: "internaldrive.fill",
+                        color: .green
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            if monitor.totalDisk == "N/A" || monitor.usedDisk == "N/A" {
+                                Text("N/A")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                            } else {
+                                ProgressView(value: monitor.diskUsage, total: 100)
+                                    .tint(.green)
+                                HStack {
+                                    Text("\(String(format: "%.1f", monitor.diskUsage))%")
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Text("\(monitor.usedDisk) / \(monitor.totalDisk) GB")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
                     
                     // 硬盘读写
                     StatusCard(
@@ -407,6 +435,11 @@ struct ContentView: View {
         lines.append("[监控]")
         lines.append("cpuUsage: \(String(format: "%.1f", monitor.cpuUsage))%")
         lines.append("memoryUsage: \(String(format: "%.1f", monitor.memoryUsage))% (\(monitor.usedMemory)/\(monitor.totalMemory) GB)")
+        if monitor.totalDisk == "N/A" || monitor.usedDisk == "N/A" {
+            lines.append("diskUsage: N/A")
+        } else {
+            lines.append("diskUsage: \(String(format: "%.1f", monitor.diskUsage))% (\(monitor.usedDisk)/\(monitor.totalDisk) GB)")
+        }
         lines.append("disk: read \(monitor.diskReadSpeed) MB/s, write \(monitor.diskWriteSpeed) MB/s")
         lines.append("network: down \(monitor.networkDownloadSpeed) MB/s, up \(monitor.networkUploadSpeed) MB/s")
         if !monitor.temperatures.isEmpty {

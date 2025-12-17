@@ -32,7 +32,7 @@ final class DevicesViewModel: ObservableObject {
         }
         
         do {
-            try await service.upsertCurrentDevice(session: session)
+            _ = try await service.upsertCurrentDevice(session: session)
             devices = try await service.fetchDevices(session: session)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

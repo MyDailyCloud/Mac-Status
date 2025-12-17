@@ -3,8 +3,10 @@ import Foundation
 @MainActor
 class MetricsUploader: ObservableObject {
     private let service: SupabaseMetricsService?
+    private let deviceService: SupabaseDeviceService?
     private var lastUploadDate: Date?
     private let minInterval: TimeInterval = 5
+    private var cachedDeviceId: String?
     
     @Published var lastUploadAttemptAt: Date?
     @Published var lastUploadSucceededAt: Date?
@@ -13,8 +15,10 @@ class MetricsUploader: ObservableObject {
     init() {
         if let config = SupabaseConfig.load() {
             service = SupabaseMetricsService(config: config)
+            deviceService = SupabaseDeviceService(config: config)
         } else {
             service = nil
+            deviceService = nil
         }
     }
     
@@ -28,6 +32,10 @@ class MetricsUploader: ObservableObject {
             lastUploadErrorMessage = AuthError.configurationMissing.localizedDescription
             return
         }
+        guard let deviceService = deviceService else {
+            lastUploadErrorMessage = AuthError.configurationMissing.localizedDescription
+            return
+        }
         
         Task {
             guard let session = await authManager.ensureValidSession() else {
@@ -38,7 +46,16 @@ class MetricsUploader: ObservableObject {
             }
             
             do {
-                try await service.upload(snapshot: snapshot, session: session)
+                let deviceId: String
+                if let cached = await MainActor.run(body: { self.cachedDeviceId }), !cached.isEmpty {
+                    deviceId = cached
+                } else {
+                    let id = try await deviceService.upsertCurrentDevice(session: session)
+                    await MainActor.run { self.cachedDeviceId = id }
+                    deviceId = id
+                }
+                
+                try await service.upload(snapshot: snapshot, session: session, deviceId: deviceId)
                 await MainActor.run {
                     self.lastUploadSucceededAt = Date()
                     self.lastUploadErrorMessage = nil

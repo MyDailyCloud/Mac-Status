@@ -9,6 +9,9 @@ struct MetricsSnapshot: Codable {
     let memoryUsage: Double
     let usedMemoryGB: Double
     let totalMemoryGB: Double
+    let diskUsage: Double
+    let diskUsedGB: Double
+    let diskTotalGB: Double
     let diskReadSpeedMBps: Double
     let diskWriteSpeedMBps: Double
     let networkDownloadSpeedMBps: Double
@@ -21,6 +24,9 @@ class SystemMonitor: ObservableObject {
     @Published var memoryUsage: Double = 0
     @Published var usedMemory: String = "0.0"
     @Published var totalMemory: String = "0.0"
+    @Published var diskUsage: Double = 0
+    @Published var usedDisk: String = "N/A"
+    @Published var totalDisk: String = "N/A"
     @Published var diskReadSpeed: String = "0.0"
     @Published var diskWriteSpeed: String = "0.0"
     @Published var networkDownloadSpeed: String = "0.0"
@@ -80,6 +86,7 @@ class SystemMonitor: ObservableObject {
     private func updateAllStats() {
         updateCPUUsage()
         updateMemoryUsage()
+        updateDiskUsage()
         updateDiskStats()
         updateNetworkStats()
         updateTemperatures()
@@ -92,6 +99,9 @@ class SystemMonitor: ObservableObject {
                 memoryUsage: self.memoryUsage,
                 usedMemoryGB: Double(self.usedMemory) ?? 0,
                 totalMemoryGB: Double(self.totalMemory) ?? 0,
+                diskUsage: self.diskUsage,
+                diskUsedGB: Double(self.usedDisk) ?? 0,
+                diskTotalGB: Double(self.totalDisk) ?? 0,
                 diskReadSpeedMBps: Double(self.diskReadSpeed) ?? 0,
                 diskWriteSpeedMBps: Double(self.diskWriteSpeed) ?? 0,
                 networkDownloadSpeedMBps: Double(self.networkDownloadSpeed) ?? 0,
@@ -163,6 +173,43 @@ class SystemMonitor: ObservableObject {
     }
     
     // MARK: - 硬盘监控
+    private func updateDiskUsage() {
+        do {
+            let attrs = try FileManager.default.attributesOfFileSystem(forPath: "/")
+            guard
+                let total = attrs[.systemSize] as? NSNumber,
+                let free = attrs[.systemFreeSize] as? NSNumber
+            else {
+                DispatchQueue.main.async {
+                    self.diskUsage = 0
+                    self.usedDisk = "N/A"
+                    self.totalDisk = "N/A"
+                }
+                return
+            }
+            
+            let totalBytes = total.uint64Value
+            let freeBytes = free.uint64Value
+            let usedBytes = totalBytes >= freeBytes ? (totalBytes - freeBytes) : 0
+            
+            let usedGB = Double(usedBytes) / 1_073_741_824
+            let totalGB = Double(totalBytes) / 1_073_741_824
+            let usage = totalBytes > 0 ? (Double(usedBytes) / Double(totalBytes) * 100) : 0
+            
+            DispatchQueue.main.async {
+                self.diskUsage = usage
+                self.usedDisk = String(format: "%.1f", usedGB)
+                self.totalDisk = String(format: "%.1f", totalGB)
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.diskUsage = 0
+                self.usedDisk = "N/A"
+                self.totalDisk = "N/A"
+            }
+        }
+    }
+    
     private func updateDiskStats() {
         var stats = [String: UInt64]()
         var servicesVisited = 0

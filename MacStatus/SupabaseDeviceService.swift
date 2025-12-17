@@ -28,7 +28,7 @@ class SupabaseDeviceService {
         self.config = config
     }
     
-    func upsertCurrentDevice(session: SupabaseSession) async throws {
+    func upsertCurrentDevice(session: SupabaseSession) async throws -> String {
         let rawUserId = session.user?.id.trimmingCharacters(in: .whitespacesAndNewlines)
         let userId = (rawUserId?.isEmpty == false) ? rawUserId : JWT.claim(session.accessToken, key: "sub")
         guard let userId, !userId.isEmpty else {
@@ -36,7 +36,10 @@ class SupabaseDeviceService {
         }
         
         var components = URLComponents(url: config.url.appendingPathComponent("rest/v1/mac_status_devices"), resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "on_conflict", value: "user_id,device_uuid")]
+        components?.queryItems = [
+            URLQueryItem(name: "on_conflict", value: "user_id,device_uuid"),
+            URLQueryItem(name: "select", value: "id")
+        ]
         guard let url = components?.url else { throw AuthError.network("无法拼接设备注册地址。") }
         
         var request = URLRequest(url: url)
@@ -44,7 +47,7 @@ class SupabaseDeviceService {
         request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("resolution=merge-duplicates,return=minimal", forHTTPHeaderField: "Prefer")
+        request.setValue("resolution=merge-duplicates,return=representation", forHTTPHeaderField: "Prefer")
         
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -68,6 +71,13 @@ class SupabaseDeviceService {
             let msg = String(data: data, encoding: .utf8) ?? "未知错误"
             throw AuthError.network("设备注册失败 (\(http.statusCode))：\(msg)")
         }
+        
+        struct DeviceUpsertResult: Decodable { let id: String }
+        let rows = try JSONDecoder().decode([DeviceUpsertResult].self, from: data)
+        guard let id = rows.first?.id, !id.isEmpty else {
+            throw AuthError.network("设备注册成功但未返回 device_id。")
+        }
+        return id
     }
     
     func fetchDevices(session: SupabaseSession) async throws -> [MacStatusDevice] {
