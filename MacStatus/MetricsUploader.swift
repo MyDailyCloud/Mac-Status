@@ -5,7 +5,10 @@ class MetricsUploader: ObservableObject {
     private let service: SupabaseMetricsService?
     private let deviceService: SupabaseDeviceService?
     private var lastUploadDate: Date?
-    private let minInterval: TimeInterval = 5
+    private var minInterval: TimeInterval {
+        let interval = UserDefaults.standard.double(forKey: "UploadInterval")
+        return interval > 0 ? interval : 5.0
+    }
     private var cachedDeviceId: String?
     
     @Published var lastUploadAttemptAt: Date?

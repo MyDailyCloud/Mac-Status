@@ -14,13 +14,19 @@ A lightweight macOS menu bar app for real-time system monitoring, with Supabase-
 
 ## Features
 
-- **CPU**: real-time CPU usage
-- **Memory**: used/total memory and percentage
-- **Disk Usage**: used/total capacity and percentage
-- **Disk I/O**: real-time read/write speed (MB/s)
-- **Network**: real-time download/upload speed (MB/s)
-- **Temperatures/Fans**: currently simulated values (`SystemMonitor` has SMC hooks but they return `nil` for now)
-- **Auth & Uploading**: GitHub OAuth via Supabase; uploads a snapshot every 5 seconds to `mac_status_metrics`
+- **CPU**: Real-time CPU usage with 1-minute trend sparklines
+- **Memory**: Used/total memory, percentage, and 1-minute trend sparklines
+- **Real Hardware Sensors**: Real CPU/GPU temperature and fan speed readings (Intel & Apple Silicon support)
+- **Battery Health**: Real-time monitoring of battery level, charging status, cycle count, and health percentage
+- **High-Resource Processes**: List the top 5 processes consuming the most CPU and memory
+- **Menu Bar Customization**: Choose to display CPU, Network, or Memory metrics directly in the menu bar
+- **Alert Notifications**: System notifications for high CPU temperature, low memory, or low disk space
+- **Smart Power Saving**: Automatically reduces sampling frequency when battery is low (<20%)
+- **Launch at Login**: Native support for starting the app automatically at system startup
+- **Cloud Sync**: GitHub OAuth login via Supabase; data synchronization with multi-device management (rename/delete records)
+- **Disk I/O**: Real-time read/write speeds (MB/s)
+- **Network**: Real-time download/upload speeds (MB/s)
+- **SwiftUI Interface**: Native macOS look and feel with extremely low resource footprint
 
 ## Screenshots
 
@@ -131,16 +137,19 @@ Mac-Status/
 
 ## Permissions & Security
 
-- App Sandbox is enabled; network access is required for Supabase.
-- Data is uploaded to your own Supabase project; keep `SUPABASE_ANON_KEY` safe and configure RLS appropriately.
+- **Sandboxing Disabled**: App Sandbox has been disabled to allow direct IOKit access for hardware sensor readings (temperature/fans).
+- **Network Access**: Used only for communication with your own Supabase project.
+- **Data Privacy**: All data is uploaded to your own Supabase instance; the developers do not have access to your data.
 
 ## Roadmap
 
-- [ ] Real SMC temperature/fan readings
-- [ ] Historical charts and filters
-- [ ] Custom refresh/upload intervals
-- [ ] Alerts/notifications (e.g., high temperature)
-- [ ] Launch at login option
+- [x] Real SMC temperature/fan readings
+- [x] Historical charts (recent 1 minute)
+- [x] Custom refresh/upload intervals
+- [x] Alerts/notifications (CPU/Memory)
+- [x] Launch at login option
+- [x] Smart Power Saving mode
+- [x] Cloud device renaming and cleanup
 
 ## Contributing
 

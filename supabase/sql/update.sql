@@ -140,4 +140,29 @@ for select
 to authenticated
 using (auth.uid()::text = user_id);
 
+-- 新增：实时状态视图（用于 Web 控制台高效展示）
+create or replace view public.v_mac_status_latest as
+select distinct on (device_id)
+  m.id,
+  m.created_at,
+  m.user_id,
+  m.device_id,
+  d.device_name,
+  d.model,
+  m.cpu_usage,
+  m.memory_usage,
+  m.used_memory_gb,
+  m.total_memory_gb,
+  m.disk_read_mb_s,
+  m.disk_write_mb_s,
+  m.network_download_mb_s,
+  m.network_upload_mb_s,
+  m.payload
+from public.mac_status_metrics m
+join public.mac_status_devices d on m.device_id = d.id
+order by device_id, m.created_at desc;
+
+-- 授予权限
+grant select on public.v_mac_status_latest to authenticated;
+
 commit;

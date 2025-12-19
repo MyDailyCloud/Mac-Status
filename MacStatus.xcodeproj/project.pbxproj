@@ -18,6 +18,11 @@
 		A1000009000000000000001 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010000000000000001 /* DeviceManager.swift */; };
 		A100000A000000000000001 /* SupabaseDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011000000000000001 /* SupabaseDeviceService.swift */; };
 		A100000B000000000000001 /* DevicesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012000000000000001 /* DevicesViewModel.swift */; };
+		A100000D000000000000001 /* SMCWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014000000000000001 /* SMCWrapper.swift */; };
+		A100000E000000000000001 /* SparklineChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000015000000000000001 /* SparklineChart.swift */; };
+		A100000F000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016000000000000001 /* SettingsView.swift */; };
+		A1000010000000000000001 /* LaunchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017000000000000001 /* LaunchManager.swift */; };
+		A1000011000000000000001 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018000000000000001 /* NotificationManager.swift */; };
 		A100000C000000000000001 /* .env in Resources */ = {isa = PBXBuildFile; fileRef = A2000013000000000000001 /* .env */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +39,11 @@
 		A2000010000000000000001 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
 		A2000011000000000000001 /* SupabaseDeviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDeviceService.swift; sourceTree = "<group>"; };
 		A2000012000000000000001 /* DevicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesViewModel.swift; sourceTree = "<group>"; };
+		A2000014000000000000001 /* SMCWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCWrapper.swift; sourceTree = "<group>"; };
+		A2000015000000000000001 /* SparklineChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparklineChart.swift; sourceTree = "<group>"; };
+		A2000016000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A2000017000000000000001 /* LaunchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchManager.swift; sourceTree = "<group>"; };
+		A2000018000000000000001 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A2000013000000000000001 /* .env */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env; sourceTree = "<group>"; };
 		A3000001000000000000001 /* MacStatus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacStatus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -74,8 +84,13 @@
 				A2000001000000000000001 /* MacStatusApp.swift */,
 				A2000002000000000000001 /* ContentView.swift */,
 				A2000003000000000000001 /* SystemMonitor.swift */,
+				A2000014000000000000001 /* SMCWrapper.swift */,
+				A2000015000000000000001 /* SparklineChart.swift */,
+				A2000016000000000000001 /* SettingsView.swift */,
 				A2000005000000000000001 /* AuthManager.swift */,
 				A2000010000000000000001 /* DeviceManager.swift */,
+				A2000017000000000000001 /* LaunchManager.swift */,
+				A2000018000000000000001 /* NotificationManager.swift */,
 				A2000012000000000000001 /* DevicesViewModel.swift */,
 				A2000006000000000000001 /* RootView.swift */,
 				A2000007000000000000001 /* LoginView.swift */,
@@ -157,8 +172,13 @@
 				A1000001000000000000001 /* MacStatusApp.swift in Sources */,
 				A1000002000000000000001 /* ContentView.swift in Sources */,
 				A1000003000000000000001 /* SystemMonitor.swift in Sources */,
+				A100000D000000000000001 /* SMCWrapper.swift in Sources */,
+				A100000E000000000000001 /* SparklineChart.swift in Sources */,
+				A100000F000000000000001 /* SettingsView.swift in Sources */,
 				A1000004000000000000001 /* AuthManager.swift in Sources */,
 				A1000009000000000000001 /* DeviceManager.swift in Sources */,
+				A1000010000000000000001 /* LaunchManager.swift in Sources */,
+				A1000011000000000000001 /* NotificationManager.swift in Sources */,
 				A100000B000000000000001 /* DevicesViewModel.swift in Sources */,
 				A1000005000000000000001 /* RootView.swift in Sources */,
 				A1000006000000000000001 /* LoginView.swift in Sources */,
@@ -182,7 +202,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MacStatus/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -210,7 +230,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MacStatus/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

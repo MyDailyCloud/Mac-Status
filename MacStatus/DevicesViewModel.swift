@@ -38,4 +38,28 @@ final class DevicesViewModel: ObservableObject {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
+    
+    func renameDevice(id: String, newName: String, authManager: AuthManager) async {
+        guard let service = service else { return }
+        guard let session = await authManager.ensureValidSession() else { return }
+        
+        do {
+            try await service.updateDeviceName(id: id, newName: newName, session: session)
+            await refresh(authManager: authManager)
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+    
+    func deleteDevice(id: String, authManager: AuthManager) async {
+        guard let service = service else { return }
+        guard let session = await authManager.ensureValidSession() else { return }
+        
+        do {
+            try await service.deleteDevice(id: id, session: session)
+            await refresh(authManager: authManager)
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
 }

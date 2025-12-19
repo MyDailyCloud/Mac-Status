@@ -102,4 +102,46 @@ class SupabaseDeviceService {
         
         return try JSONDecoder().decode([MacStatusDevice].self, from: data)
     }
+    
+    func updateDeviceName(id: String, newName: String, session: SupabaseSession) async throws {
+        let url = config.url.appendingPathComponent("rest/v1/mac_status_devices")
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+        guard let finalUrl = components?.url else { throw AuthError.network("无法拼接重命名地址。") }
+        
+        var request = URLRequest(url: finalUrl)
+        request.httpMethod = "PATCH"
+        request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let payload = ["device_name": newName]
+        request.httpBody = try JSONEncoder().encode(payload)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw AuthError.network("更新设备名称失败：无有效响应。") }
+        if !(200..<300).contains(http.statusCode) {
+            let msg = String(data: data, encoding: .utf8) ?? "未知错误"
+            throw AuthError.network("更新设备名称失败 (\(http.statusCode))：\(msg)")
+        }
+    }
+    
+    func deleteDevice(id: String, session: SupabaseSession) async throws {
+        let url = config.url.appendingPathComponent("rest/v1/mac_status_devices")
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+        guard let finalUrl = components?.url else { throw AuthError.network("无法拼接删除地址。") }
+        
+        var request = URLRequest(url: finalUrl)
+        request.httpMethod = "DELETE"
+        request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw AuthError.network("删除设备失败：无有效响应。") }
+        if !(200..<300).contains(http.statusCode) {
+            let msg = String(data: data, encoding: .utf8) ?? "未知错误"
+            throw AuthError.network("删除设备失败 (\(http.statusCode))：\(msg)")
+        }
+    }
 }

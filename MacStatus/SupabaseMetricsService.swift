@@ -98,7 +98,11 @@ class SupabaseMetricsService {
             "device_name": .string(device.deviceName),
             "model": .string(device.model),
             "os_version": .string(device.osVersion),
-            "app_version": .string(device.appVersion)
+            "app_version": .string(device.appVersion),
+            "battery_level": .int(snapshot.batteryLevel),
+            "is_charging": .bool(snapshot.isCharging),
+            "battery_health": .int(snapshot.batteryHealth),
+            "battery_cycles": .int(snapshot.batteryCycles)
         ]
         let v2 = MetricsPayload(
             user_id: userId,
